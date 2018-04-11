@@ -1,10 +1,13 @@
 buildscript {
     dependencies {
         classpath rootProject.ext.androidPlugin
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.0'
+
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion
@@ -23,5 +26,3 @@ android {
 dependencies {
     implementation project(':android-iconify')
 }
-
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
