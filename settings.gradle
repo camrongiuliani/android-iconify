@@ -1,5 +1,2 @@
 include ':android-iconify',
-        ':android-iconify-fontawesome',
-        ':android-iconify-material',
-        ':android-iconify-material-community',
-        ':android-iconify-ionicons'
+        ':android-iconify-fontawesome'
