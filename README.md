@@ -2,10 +2,10 @@
 ## About this fork
 This is a fork to keep Iconify alive for [edx-android-app](https://github.com/edx/edx-app-android),
 there as many modifications from the original code from @JoanZapata that EDX team made.
-I removed all font packages that isn't used and only FontAwesome is avaliable for now, I also updated builds to latest Android libraries.
+I removed all font packages that aren't used and only FontAwesome is available for now, I also updated builds to latest Android libraries.
 
 ## Install
-If you want to use this in your project, it is avaliable from Jitpack.
+If you want to use this in your project, it is available from Jitpack.
 ```gradle
 allprojects {
     repositories {
@@ -22,4 +22,4 @@ dependencies {
 ```
 
 ## Docs and attribution
-Original docs and code is avaliable on [JoanZapata/android-iconify](https://github.com/JoanZapata/android-iconify).
+Original docs and code is available on [JoanZapata/android-iconify](https://github.com/JoanZapata/android-iconify).
