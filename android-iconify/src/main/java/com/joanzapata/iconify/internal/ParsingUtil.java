@@ -1,18 +1,20 @@
 package com.joanzapata.iconify.internal;
 
-import java.util.List;
-
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
-import android.support.v4.view.ViewCompat;
+import android.support.annotation.CheckResult;
+import android.support.annotation.FloatRange;
+import android.support.annotation.IntRange;
+import android.support.annotation.NonNull;
+import android.support.annotation.Size;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.util.TypedValue;
 import android.widget.TextView;
-
 import com.joanzapata.iconify.Icon;
-import com.joanzapata.iconify.internal.HasOnViewAttachListener.OnViewAttachListener;
+
+import java.util.List;
 
 public final class ParsingUtil {
 
@@ -21,77 +23,34 @@ public final class ParsingUtil {
     // Prevents instantiation
     private ParsingUtil() {}
 
+    @CheckResult
+    @NonNull
     public static CharSequence parse(
-            Context context,
+            @NonNull
+            TextView targetView,
+            @NonNull @Size(min = 1)
             List<IconFontDescriptorWrapper> iconFontDescriptors,
-            CharSequence text,
-            final TextView target) {
-        context = context.getApplicationContext();
-
-        // Don't do anything related to iconify if text is null
-        if (text == null) return text;
-
-        // Analyse the text and replace {} blocks with the appropriate character
-        // Retain all transformations in the accumulator
+            @NonNull
+            CharSequence text) {
         final SpannableStringBuilder spannableBuilder = new SpannableStringBuilder(text);
-        recursivePrepareSpannableIndexes(context,
+        recursivePrepareSpannableIndexes(targetView,
                 text.toString(), spannableBuilder,
                 iconFontDescriptors, 0);
-        boolean isAnimated = hasAnimatedSpans(spannableBuilder);
-
-        // If animated, periodically invalidate the TextView so that the
-        // CustomTypefaceSpan can redraw itself
-        if (isAnimated) {
-            if (target == null)
-                throw new IllegalArgumentException("You can't use \"spin\" without providing the target TextView.");
-            if (!(target instanceof HasOnViewAttachListener))
-                throw new IllegalArgumentException(target.getClass().getSimpleName() + " does not implement " +
-                        "HasOnViewAttachListener. Please use IconTextView, IconButton or IconToggleButton.");
-
-            ((HasOnViewAttachListener) target).setOnViewAttachListener(new OnViewAttachListener() {
-                boolean isAttached = false;
-
-                @Override
-                public void onAttach() {
-                    isAttached = true;
-                    ViewCompat.postOnAnimation(target, new Runnable() {
-                        @Override
-                        public void run() {
-                            if (isAttached) {
-                                target.invalidate();
-                                ViewCompat.postOnAnimation(target, this);
-                            }
-                        }
-                    });
-                }
-
-                @Override
-                public void onDetach() {
-                    isAttached = false;
-                }
-            });
-
-        } else if (target instanceof HasOnViewAttachListener) {
-            ((HasOnViewAttachListener) target).setOnViewAttachListener(null);
-        }
-
         return spannableBuilder;
     }
 
-    private static boolean hasAnimatedSpans(SpannableStringBuilder spannableBuilder) {
-        CustomTypefaceSpan[] spans = spannableBuilder.getSpans(0, spannableBuilder.length(), CustomTypefaceSpan.class);
-        for (CustomTypefaceSpan span : spans) {
-            if (span.isAnimated())
-                return true;
-        }
-        return false;
-    }
-
+    // Analyse the text and replace {} blocks with the appropriate character
+    // Retain all transformations in the accumulator
     private static void recursivePrepareSpannableIndexes(
-            Context context,
+            @NonNull
+            TextView targetView,
+            @NonNull
             String fullText,
+            @NonNull
             SpannableStringBuilder text,
+            @NonNull @Size(min = 1)
             List<IconFontDescriptorWrapper> iconFontDescriptors,
+            @IntRange(from = 0)
             int start) {
 
         // Try to find a {...} in the string and extract expression from it
@@ -99,7 +58,6 @@ public final class ParsingUtil {
         int startIndex = stringText.indexOf("{", start);
         if (startIndex == -1) return;
         int endIndex = stringText.indexOf("}", startIndex) + 1;
-        if (endIndex == -1) return;
         String expression = stringText.substring(startIndex + 1, endIndex - 1);
 
         // Split the expression and retrieve the icon key
@@ -117,22 +75,28 @@ public final class ParsingUtil {
 
         // If no match, ignore and continue
         if (icon == null) {
-            recursivePrepareSpannableIndexes(context, fullText, text, iconFontDescriptors, endIndex);
+            recursivePrepareSpannableIndexes(targetView, fullText, text, iconFontDescriptors, endIndex);
             return;
         }
 
         // See if any more stroke within {} should be applied
+        Context context = targetView.getContext();
         float iconSizePx = -1;
         int iconColor = Integer.MAX_VALUE;
         float iconSizeRatio = -1;
-        boolean spin = false;
+        Animation animation = Animation.NONE;
         boolean baselineAligned = false;
         for (int i = 1; i < strokes.length; i++) {
             String stroke = strokes[i];
 
             // Look for "spin"
             if (stroke.equalsIgnoreCase("spin")) {
-                spin = true;
+                animation = Animation.SPIN;
+            }
+
+            // Look for "pulse"
+            else if (stroke.equalsIgnoreCase("pulse")) {
+                animation = Animation.PULSE;
             }
 
             // Look for "baseline"
@@ -177,15 +141,17 @@ public final class ParsingUtil {
 
         // Replace the character and apply the typeface
         text = text.replace(startIndex, endIndex, "" + icon.character());
-        text.setSpan(new CustomTypefaceSpan(icon,
+        text.setSpan(new CustomTypefaceSpan(targetView, icon,
                         iconFontDescriptor.getTypeface(context),
-                        iconSizePx, iconSizeRatio, iconColor, spin, baselineAligned),
+                        iconSizePx, iconSizeRatio, iconColor, animation, baselineAligned),
                 startIndex, startIndex + 1,
                 Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
-        recursivePrepareSpannableIndexes(context, fullText, text, iconFontDescriptors, startIndex);
+        recursivePrepareSpannableIndexes(targetView, fullText, text, iconFontDescriptors, startIndex);
     }
 
-    public static float getPxFromDimen(Context context, String packageName, String resName) {
+    @CheckResult
+    public static float getPxFromDimen(@NonNull Context context,
+            @NonNull String packageName, @NonNull String resName) {
         Resources resources = context.getResources();
         int resId = resources.getIdentifier(
                 resName, "dimen",
@@ -194,7 +160,9 @@ public final class ParsingUtil {
         return resources.getDimension(resId);
     }
 
-    public static int getColorFromResource(Context context, String packageName, String resName) {
+    @CheckResult
+    public static int getColorFromResource(@NonNull Context context,
+            @NonNull String packageName, @NonNull String resName) {
         Resources resources = context.getResources();
         int resId = resources.getIdentifier(
                 resName, "color",
@@ -203,12 +171,16 @@ public final class ParsingUtil {
         return resources.getColor(resId);
     }
 
-    public static float dpToPx(Context context, float dp) {
+    @CheckResult
+    public static float dpToPx(@NonNull Context context,
+            @FloatRange(from = 0f) float dp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
                 context.getResources().getDisplayMetrics());
     }
 
-    public static float spToPx(Context context, float sp) {
+    @CheckResult
+    public static float spToPx(@NonNull Context context,
+            @FloatRange(from = 0f) float sp) {
         return TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp,
                 context.getResources().getDisplayMetrics());
     }

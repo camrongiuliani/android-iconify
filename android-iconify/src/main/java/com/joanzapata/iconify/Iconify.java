@@ -1,6 +1,9 @@
 package com.joanzapata.iconify;
 
-import android.content.Context;
+import android.support.annotation.CheckResult;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.Size;
 import android.widget.TextView;
 import com.joanzapata.iconify.internal.IconFontDescriptorWrapper;
 import com.joanzapata.iconify.internal.ParsingUtil;
@@ -18,7 +21,8 @@ public class Iconify {
      * @param iconFontDescriptor The IconDescriptor holding the ttf file reference and its mappings.
      * @return An initializer instance for chain calls.
      */
-    public static IconifyInitializer with(IconFontDescriptor iconFontDescriptor) {
+    @NonNull
+    public static IconifyInitializer with(@NonNull IconFontDescriptor iconFontDescriptor) {
         return new IconifyInitializer(iconFontDescriptor);
     }
 
@@ -29,14 +33,14 @@ public class Iconify {
      * you'll need to call it again.
      * @param textViews The TextView(s) to enhance.
      */
-    public static void addIcons(TextView... textViews) {
+    public static void addIcons(@NonNull @Size(min = 1) TextView... textViews) {
         for (TextView textView : textViews) {
             if (textView == null) continue;
-            textView.setText(compute(textView.getContext(), textView.getText(), textView));
+            textView.setText(compute(textView, textView.getText()));
         }
     }
 
-    private static void addIconFontDescriptor(IconFontDescriptor iconFontDescriptor) {
+    private static void addIconFontDescriptor(@NonNull IconFontDescriptor iconFontDescriptor) {
 
         // Prevent duplicates
         for (IconFontDescriptorWrapper wrapper : iconFontDescriptors) {
@@ -51,12 +55,10 @@ public class Iconify {
 
     }
 
-    public static CharSequence compute(Context context, CharSequence text) {
-        return compute(context, text, null);
-    }
-
-    public static CharSequence compute(Context context, CharSequence text, TextView target) {
-        return ParsingUtil.parse(context, iconFontDescriptors, text, target);
+    @CheckResult
+    @NonNull
+    public static CharSequence compute(@NonNull TextView targetView, @NonNull CharSequence text) {
+        return ParsingUtil.parse(targetView, iconFontDescriptors, text);
     }
 
     /**
@@ -64,7 +66,7 @@ public class Iconify {
      */
     public static class IconifyInitializer {
 
-        public IconifyInitializer(IconFontDescriptor iconFontDescriptor) {
+        public IconifyInitializer(@NonNull IconFontDescriptor iconFontDescriptor) {
             Iconify.addIconFontDescriptor(iconFontDescriptor);
         }
 
@@ -73,7 +75,8 @@ public class Iconify {
          * @param iconFontDescriptor The IconDescriptor holding the ttf file reference and its mappings.
          * @return An initializer instance for chain calls.
          */
-        public IconifyInitializer with(IconFontDescriptor iconFontDescriptor) {
+        @NonNull
+        public IconifyInitializer with(@NonNull IconFontDescriptor iconFontDescriptor) {
             Iconify.addIconFontDescriptor(iconFontDescriptor);
             return this;
         }
@@ -86,7 +89,9 @@ public class Iconify {
      * if the icon cannot be found. In that case, check that you properly added the modules
      * using {@link #with(IconFontDescriptor)}} prior to calling this method.
      */
-    public static IconFontDescriptorWrapper findTypefaceOf(Icon icon) {
+    @CheckResult
+    @Nullable
+    public static IconFontDescriptorWrapper findTypefaceOf(@NonNull Icon icon) {
         for (IconFontDescriptorWrapper iconFontDescriptor : iconFontDescriptors) {
             if (iconFontDescriptor.hasIcon(icon)) {
                 return iconFontDescriptor;
@@ -100,7 +105,9 @@ public class Iconify {
      * Retrieve an icon from a key,
      * @return The icon, or null if no icon matches the key.
      */
-    public static Icon findIconForKey(String iconKey) {
+    @CheckResult
+    @Nullable
+    static Icon findIconForKey(@NonNull String iconKey) {
         for (int i = 0, iconFontDescriptorsSize = iconFontDescriptors.size(); i < iconFontDescriptorsSize; i++) {
             IconFontDescriptorWrapper iconFontDescriptor = iconFontDescriptors.get(i);
             Icon icon = iconFontDescriptor.getIcon(iconKey);
