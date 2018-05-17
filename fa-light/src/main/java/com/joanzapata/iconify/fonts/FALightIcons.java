@@ -562,7 +562,6 @@ public enum FALightIcons implements Icon {
     fa_mercury('\uf223'),
     fa_microchip('\uf2db'),
     fa_microphone('\uf130'),
-    fa_microphone_alt('\uf3c9'),
     fa_microphone_slash('\uf131'),
     fa_microsoft('\uf3ca'),
     fa_minus('\uf068'),
