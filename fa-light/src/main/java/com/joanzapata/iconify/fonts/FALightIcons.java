@@ -4,7 +4,7 @@ import android.support.annotation.NonNull;
 
 import com.joanzapata.iconify.Icon;
 
-public enum FontAwesomeIcons implements Icon {
+public enum FALightIcons implements Icon {
     fa_500px('\uf26e'),
     fa_accessible_icon('\uf368'),
     fa_accusoft('\uf369'),
@@ -957,11 +957,11 @@ public enum FontAwesomeIcons implements Icon {
     private final char character;
     private final boolean supportsRtl;
 
-    FontAwesomeIcons(char character) {
+    FALightIcons(char character) {
         this(character, true);
     }
 
-    FontAwesomeIcons(char character, boolean supportsRtl) {
+    FALightIcons(char character, boolean supportsRtl) {
         this.character = character;
         this.supportsRtl = supportsRtl;
     }

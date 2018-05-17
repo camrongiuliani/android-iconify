@@ -1,2 +1,5 @@
 include ':android-iconify',
-        ':android-iconify-fontawesome'
+        ':fa-regular',
+        ':fa-light',
+        ':fa-brands',
+        ':fa-web'

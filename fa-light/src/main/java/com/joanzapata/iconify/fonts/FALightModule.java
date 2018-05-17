@@ -5,17 +5,17 @@ import android.support.annotation.NonNull;
 import com.joanzapata.iconify.Icon;
 import com.joanzapata.iconify.IconFontDescriptor;
 
-public class FontAwesomeModule implements IconFontDescriptor {
+public class FALightModule implements IconFontDescriptor {
 
     @Override
     @NonNull
     public String ttfFileName() {
-        return "iconify/android-iconify-fontawesome.ttf";
+        return "iconify/fa-light-300.ttf";
     }
 
     @Override
     @NonNull
     public Icon[] characters() {
-        return FontAwesomeIcons.values();
+        return FALightIcons.values();
     }
 }
