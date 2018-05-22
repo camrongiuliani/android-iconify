@@ -440,7 +440,6 @@ public enum FAWebIcons implements Icon {
     fa_hand_rock('\uf255'),
     fa_hand_scissors('\uf257'),
     fa_hand_spock('\uf259'),
-    fa_handshake('\uf2b5'),
     fa_hashtag('\uf292'),
     fa_hdd('\uf0a0'),
     fa_heading('\uf1dc'),
